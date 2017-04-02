@@ -106,7 +106,7 @@ def fill(d, amount, dom, sub, nsvrs, dns_timeout):
     for i in range(amount):
         # calls next() on the generator to get the next iteration (or next
         # subdomain)
-        _target = '{}.{}'.format(sub.next(), dom)
+        _target = str.split('{}.{}'.format(sub.next(), dom),"|")[0].strip()
         t = Prober(
             # dns server
             random.choice(nsvrs),
@@ -126,13 +126,13 @@ def fill(d, amount, dom, sub, nsvrs, dns_timeout):
 # time.sleep(_will_take)
 
 def main(dom, max_running_threads, outfile, overwrite, infile, nsvrs, max_subdomain_len, dns_timeout):
-    if os.path.exists(outfile):
-        if overwrite is False:
-            raise SystemExit(
-                "Specified file {} exists and overwrite "
-                "option (-f) not set".format(outfile))
-        else:
-            log.info("Overwriting output file {}".format(outfile))
+    #if os.path.exists(outfile):
+## if overwrite is False:
+        #    raise SystemExit(
+        #        "Specified file {} exists and overwrite "
+        #        "option (-f) not set".format(outfile))
+        #else:
+        #    log.info("Overwriting output file {}".format(outfile))
     # print(
     #     "-: queue ckeck interval increased by {}%\n.: "
     #     "no change\n".format(INCREASE_PERCENT))
@@ -203,10 +203,12 @@ def main(dom, max_running_threads, outfile, overwrite, infile, nsvrs, max_subdom
     for el in range(len(d)):
         t = d.popleft()
         t.join()
-    with open(outfile, 'w') as f:
+    with open(outfile, 'a') as f:
         for r in res:
+            print (r)
             f.write('{}\n'.format(r))
-    log.info("Results written into file {}".format(outfile))
+
+    #log.info("Results written into file {}".format(outfile))
 
 
 if __name__ == '__main__':
@@ -253,3 +255,21 @@ if __name__ == '__main__':
         args.max_subdomain_len,
         args.dns_timeout,
         )
+    depth = 2
+
+    for i in range(depth):
+        bck_res = res
+        res = []
+        for r in bck_res:
+            print ("recursia")
+            new_domain = (str.split(r,"|")[0].strip())
+            main(
+                r,
+                args.max_running_threads,
+                args.savefile,
+                args.force_overwrite,
+                args.use_list,
+                _nsvrs,
+                args.max_subdomain_len,
+                args.dns_timeout,
+            )
